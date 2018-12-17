@@ -27,9 +27,15 @@ guard arguments.count > 1 else {
     exit(1)
 }
 
-let playgroundName = arguments[1]
+var targetPath = arguments[1]
+
+if arguments.contains("-icloud") {
+    let iCloudDrivePath = "~/Library/Mobile Documents/iCloud~com~apple~Playgrounds/Documents/"
+    targetPath = iCloudDrivePath + targetPath
+}
+
 let files = Folder.current.makeFileSequence(recursive: true)
-let playground = Playground(path: playgroundName)
+let playground = Playground(path: targetPath)
 
 for file in files where file.extension == "swift" {
     playground.auxiliarySourceFiles.append(file)
@@ -37,16 +43,7 @@ for file in files where file.extension == "swift" {
 
 try playground.generate()
 
-let playgroundFolder = try Folder(path: playground.path)
-
-if arguments.contains("-icloud") {
-    let iCloudDrivePath = "~/Library/Mobile Documents/iCloud~com~apple~Playgrounds/Documents"
-    let iCloudDrive = try Folder(path: iCloudDrivePath)
-
-    try playgroundFolder.move(to: iCloudDrive)
-}
-
 print("""
 ✅ Generated playground containing \(files.count) source files at:
-👉 \(playgroundFolder.path)
+👉 \(playground.path)
 """)
